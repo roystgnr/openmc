@@ -2090,6 +2090,7 @@ UnstructuredMesh::count_sites(const std::vector<Particle::Bank>& bank,
   }
 
 double UnstructuredMesh::get_volume_frac(int bin = -1) const {
+
   return 0.0;
 
 }
