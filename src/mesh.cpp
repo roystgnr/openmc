@@ -108,6 +108,36 @@ StructuredMesh::bin_label(int bin) const {
 }
 
 //==============================================================================
+// Untructured Mesh implementation
+//==============================================================================
+
+UnstructuredMeshBase::UnstructuredMeshBase(pugi::xml_node node) : Mesh(node) {
+  // check the mesh type
+  if (check_for_node(node, "type")) {
+    auto temp = get_node_value(node, "type", true, true);
+    if (temp != "unstructured") {
+      fatal_error("Invalid mesh type: " + temp);
+    }
+  }
+
+  // get the filename of the unstructured mesh to load
+  if (check_for_node(node, "mesh_file")) {
+    filename_ = get_node_value(node, "mesh_file");
+  }
+  else {
+    fatal_error("No filename supplied for unstructured mesh with ID: " +
+                std::to_string(id_));
+  }
+}
+
+std::string
+UnstructuredMeshBase::bin_label(int bin) const {
+  std::stringstream out;
+  out << "Mesh Index (" << bin << ")";
+  return out.str();
+};
+
+//==============================================================================
 // RegularMesh implementation
 //==============================================================================
 
@@ -823,7 +853,11 @@ RegularMesh::count_sites(const Particle::Bank* bank,
                          bool* outside) const
 {
   // Determine shape of array for counts
+<<<<<<< HEAD
   std::size_t m = this->n_bins();
+=======
+  std::size_t m = n_bins();
+>>>>>>> Removing call to set LibMesh threads and updating call for setting point containment tolerance.
   std::vector<std::size_t> shape = {m};
 
   // Create array of zeros
@@ -1575,28 +1609,6 @@ openmc_mesh_set_params(int32_t index, int n, const double* ll, const double* ur,
 
 #ifdef DAGMC
 
-<<<<<<< HEAD
-UnstructuredMesh::UnstructuredMesh(pugi::xml_node node) : Mesh(node)
-{
-  // unstructured always assumed to be 3D
-  n_dimension_ = 3;
-
-  // check the mesh type
-  if (check_for_node(node, "type")) {
-    auto temp = get_node_value(node, "type", true, true);
-    if (temp != "unstructured") {
-      fatal_error("Invalid mesh type: " + temp);
-    }
-  }
-
-  // get the filename of the unstructured mesh to load
-  if (check_for_node(node, "filename")) {
-    filename_ = get_node_value(node, "filename");
-  } else {
-    fatal_error("No filename supplied for unstructured mesh with ID: " +
-                std::to_string(id_));
-  }
-=======
 UnstructuredMesh::UnstructuredMesh(pugi::xml_node node) : UnstructuredMeshBase(node) {
   initialize();
 }
@@ -1605,7 +1617,6 @@ UnstructuredMesh::UnstructuredMesh(const std::string& filename) {
   filename_ = filename;
   initialize();
 }
->>>>>>> Updating unstructured mesh constructors to take a filename (template). Exposing unstructured mesh addition via CAPI.
 
 void UnstructuredMesh::initialize() {
   // create MOAB instance
@@ -1834,9 +1845,17 @@ double UnstructuredMesh::tet_volume(moab::EntityHandle tet) const {
  return 1.0 / 6.0 * (((p[1] - p[0]) * (p[2] - p[0])) % (p[3] - p[0]));
 }
 
+<<<<<<< HEAD
 void UnstructuredMesh::surface_bins_crossed(const Particle& p, std::vector<int>& bins) const {
+=======
+void UnstructuredMesh::surface_bins_crossed(const Particle* p, std::vector<int>& bins) const {
+<<<<<<< HEAD
+>>>>>>> Removing call to set LibMesh threads and updating call for setting point containment tolerance.
   // TODO: Implement triangle crossings here
   throw std::runtime_error{"Unstructured mesh surface tallies are not implemented."};
+=======
+  return;
+>>>>>>> Removing call to set LibMesh threads and updating call for setting point containment tolerance.
 }
 
 int
@@ -2027,11 +2046,14 @@ UnstructuredMesh::centroid(moab::EntityHandle tet) const {
   return {centroid[0], centroid[1], centroid[2]};
 }
 
+<<<<<<< HEAD
 std::string
 UnstructuredMesh::bin_label(int bin) const {
   return fmt::format("Mesh Index ({})", bin);
 };
 
+=======
+>>>>>>> Removing call to set LibMesh threads and updating call for setting point containment tolerance.
 std::pair<moab::Tag, moab::Tag>
 UnstructuredMesh::get_score_tags(std::string score) const {
   moab::ErrorCode rval;
@@ -2127,6 +2149,7 @@ UnstructuredMesh::write(std::string base_filename) const {
     auto msg = fmt::format("Failed to write unstructured mesh {}", id_);
     warning(msg);
   }
+<<<<<<< HEAD
 
 xt::xarray<double>
 UnstructuredMesh::count_sites(const std::vector<Particle::Bank>& bank,
@@ -2139,28 +2162,12 @@ double UnstructuredMesh::get_volume_frac(int bin = -1) const {
 
   return 0.0;
 
+=======
+>>>>>>> Removing call to set LibMesh threads and updating call for setting point containment tolerance.
 }
 
 #endif
 
-UnstructuredMeshBase::UnstructuredMeshBase(pugi::xml_node node) : Mesh(node) {
-    // check the mesh type
-  if (check_for_node(node, "type")) {
-    auto temp = get_node_value(node, "type", true, true);
-    if (temp != "unstructured") {
-      fatal_error("Invalid mesh type: " + temp);
-    }
-  }
-
-  // get the filename of the unstructured mesh to load
-  if (check_for_node(node, "mesh_file")) {
-    filename_ = get_node_value(node, "mesh_file");
-  }
-  else {
-    fatal_error("No filename supplied for unstructured mesh with ID: " +
-                std::to_string(id_));
-  }
-}
 
 #ifdef LIBMESH
 LibMesh::LibMesh(pugi::xml_node node) : UnstructuredMeshBase(node) {
@@ -2192,7 +2199,7 @@ void LibMesh::initialize() {
   point_locators_ = std::vector<std::unique_ptr<libMesh::PointLocatorBase>>(n_threads);
   for (int i = 0; i < n_threads; i++) {
     point_locators_[i] = m_->sub_point_locator();
-    point_locators_[i]->set_find_element_tol(FP_COINCIDENT);
+    point_locators_[i]->set_contains_point_tol(FP_COINCIDENT);
     point_locators_[i]->enable_out_of_mesh_mode();
   }
 
