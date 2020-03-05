@@ -853,11 +853,7 @@ RegularMesh::count_sites(const Particle::Bank* bank,
                          bool* outside) const
 {
   // Determine shape of array for counts
-<<<<<<< HEAD
   std::size_t m = this->n_bins();
-=======
-  std::size_t m = n_bins();
->>>>>>> Removing call to set LibMesh threads and updating call for setting point containment tolerance.
   std::vector<std::size_t> shape = {m};
 
   // Create array of zeros
@@ -907,7 +903,7 @@ RegularMesh::count_sites(const Particle::Bank* bank,
   return counts;
 }
 
-std::string RegularMesh::get_label_for_bin(int bin) const {
+std::string RegularMesh::bin_label(int bin) const {
   int ijk[n_dimension_];
   get_indices_from_bin(bin, ijk);
 
@@ -918,10 +914,6 @@ std::string RegularMesh::get_label_for_bin(int bin) const {
   out << ")";
 
   return out.str();
-}
-
-double RegularMesh::get_volume_frac(int bin) const {
-  return volume_frac_;
 }
 
 //==============================================================================
@@ -1787,14 +1779,11 @@ UnstructuredMesh::bins_crossed(const Particle& p,
     auto tet = get_tet(segment_midpoint);
     if (tet) {
       bins.push_back(get_bin_from_ent_handle(tet));
-      lengths.push_back((hit.first - last_dist) / track_len);
+      lengths.push_back((hit->first - last_dist) / track_len);
     } else {
       // if in the loop, we should always find a tet
       warning("No tet found for location between trianle hits");
     }
-
-    bins.push_back(bin);
-    lengths.push_back(segment_length / track_len);
 
   }
 
@@ -1856,17 +1845,9 @@ double UnstructuredMesh::tet_volume(moab::EntityHandle tet) const {
  return 1.0 / 6.0 * (((p[1] - p[0]) * (p[2] - p[0])) % (p[3] - p[0]));
 }
 
-<<<<<<< HEAD
 void UnstructuredMesh::surface_bins_crossed(const Particle& p, std::vector<int>& bins) const {
-=======
-void UnstructuredMesh::surface_bins_crossed(const Particle* p, std::vector<int>& bins) const {
-<<<<<<< HEAD
->>>>>>> Removing call to set LibMesh threads and updating call for setting point containment tolerance.
   // TODO: Implement triangle crossings here
   throw std::runtime_error{"Unstructured mesh surface tallies are not implemented."};
-=======
-  return;
->>>>>>> Removing call to set LibMesh threads and updating call for setting point containment tolerance.
 }
 
 int
@@ -2057,14 +2038,11 @@ UnstructuredMesh::centroid(moab::EntityHandle tet) const {
   return {centroid[0], centroid[1], centroid[2]};
 }
 
-<<<<<<< HEAD
 std::string
 UnstructuredMesh::bin_label(int bin) const {
   return fmt::format("Mesh Index ({})", bin);
 };
 
-=======
->>>>>>> Removing call to set LibMesh threads and updating call for setting point containment tolerance.
 std::pair<moab::Tag, moab::Tag>
 UnstructuredMesh::get_score_tags(std::string score) const {
   moab::ErrorCode rval;
@@ -2160,7 +2138,6 @@ UnstructuredMesh::write(std::string base_filename) const {
     auto msg = fmt::format("Failed to write unstructured mesh {}", id_);
     warning(msg);
   }
-<<<<<<< HEAD
 
 xt::xarray<double>
 UnstructuredMesh::count_sites(const std::vector<Particle::Bank>& bank,
@@ -2173,8 +2150,6 @@ double UnstructuredMesh::get_volume_frac(int bin = -1) const {
 
   return 0.0;
 
-=======
->>>>>>> Removing call to set LibMesh threads and updating call for setting point containment tolerance.
 }
 
 #endif
@@ -2333,7 +2308,7 @@ LibMesh::bins_crossed(const Particle* p,
   lengths.clear();
 
   for (const auto& hit : hits) {
-    lengths.push_back(hit.first / track_len);
+    lengths.push_back(hit->first / track_len);
     bins.push_back(get_bin_from_element(hit.second));
   }
 }
