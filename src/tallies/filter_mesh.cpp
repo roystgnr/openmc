@@ -34,9 +34,9 @@ void
 MeshFilter::get_all_bins(const Particle& p, TallyEstimator estimator, FilterMatch& match)
 const
 {
-  Position last_r = p->r_last_;
-  Position r = p->r();
-  Position u = p->u();
+  Position last_r = p.r_last_;
+  Position r = p.r();
+  Position u = p.u();
 
   // apply translation if present
   if (translated_) {
