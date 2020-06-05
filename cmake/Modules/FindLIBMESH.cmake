@@ -7,9 +7,27 @@ find_path(LIBMESH_PC NAMES libmesh-opt.pc
           PATH_SUFFIXES lib/pkgconfig pkgconfig
           NO_DEFAULT_PATH)
 
-include(FindPkgConfig)
 set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:${LIBMESH_PC}")
-pkg_check_modules(LIBMESH REQUIRED libmesh IMPORTED_TARGET)
-pkg_check_modules(LIBMESH_DEVEL REQUIRED libmesh-devel IMPORTED_TARGET)
+find_package(PkgConfig REQUIRED)
+
+pkg_check_modules(LIBMESH REQUIRED IMPORTED_TARGET libmesh)
+
+# older versions of CMake won't check the system libraries
+# if '-L' appears in the package config libraries string.
+# This makes sure the system locations are checked
+# if any of the libraries aren't found.
+get_cmake_property(ALL_VARIABLES VARIABLES)
+foreach(VARIABLE ${ALL_VARIABLES})
+  if (NOT ${VARIABLE} AND VARIABLE MATCHES "^pkgcfg_lib_LIBMESH")
+    # get the library name
+    string(REGEX REPLACE "^(.*[_])" "" LIBNAME ${VARIABLE})
+    find_library(${VARIABLE} NAMES ${LIBNAME})
+    if (NOT ${VARIABLE})
+      message(FATAL_ERROR "Could not find libMesh library: ${VARIABLE}.")
+    endif()
+  endif()
+endforeach()
+
+
 
 message(STATUS "Found LIBMESH in ${LIBMESH_PC}")
